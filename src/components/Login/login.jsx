@@ -8,10 +8,12 @@ const LoginPage = ({ onLogin }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  const loginUsername = import.meta.env.VITE_REACT_APP_USERNAME;
+  const loginPassword = import.meta.env.VITE_REACT_APP_PASSWORD;
+
   const handleLogin = () => {
     // Check credentials
-    if (username === 'admin' && password === 'password@123') {
-      // In a real application, you would securely store the credentials, maybe using a token
+    if (username === loginUsername && password === loginPassword) {
       onLogin(username);
       navigate('/admin-dashboard');
       setError('');
