@@ -8,6 +8,9 @@ import Navbar from "./components/navbar";
 
 const SHEETID = import.meta.env.VITE_REACT_APP_SHEET_ID;
 const APIKEY = import.meta.env.VITE_REACT_APP_GOOGLE_SHEET_API;
+const DASHBOARDSHEET = import.meta.env.VITE_REACT_APP_GOOGLE_SHEET_DASHBOARD;
+const ADMINSHEET = import.meta.env.VITE_REACT_APP_GOOGLE_SHEET_ADMIN;
+
 
 const isAuthenticated = () => {
   return localStorage.getItem("userToken") !== null;
@@ -41,7 +44,7 @@ function App() {
       <Routes>
         <Route
           path="/"
-          element={<Dashboard sheetId={SHEETID} apiKey={APIKEY} />}
+          element={<Dashboard sheetId={SHEETID} apiKey={APIKEY} dashboardSheet={DASHBOARDSHEET} />}
         />
         <Route path="/admin" element={<Login onLogin={handleLogin} />} />
         <Route
@@ -52,6 +55,7 @@ function App() {
                 <AdminDashboard
                   sheetId={SHEETID}
                   apiKey={APIKEY}
+                  adminSheet={ADMINSHEET}
                   onLogout={handleLogout}
                 />
               }

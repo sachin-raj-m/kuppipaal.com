@@ -6,7 +6,7 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
 
-const AdminDashboard = ({ sheetId, apiKey, onLogout }) => {
+const AdminDashboard = ({ sheetId, adminSheet, apiKey, onLogout }) => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +20,7 @@ const AdminDashboard = ({ sheetId, apiKey, onLogout }) => {
   const fetchData = async () => {
     try {
       const response = await axios.get(
-        `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/January Bill?key=${apiKey}`
+        `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${adminSheet}?key=${apiKey}`
       );
 
       const sheetData = response.data.values;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "./dashboard.module.css";
 
-const Dashboard = ({ sheetId, apiKey }) => {
+const Dashboard = ({ sheetId, apiKey,dashboardSheet }) => {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const [customTitles, setCustomTitles] = useState([]);
@@ -22,7 +22,7 @@ const Dashboard = ({ sheetId, apiKey }) => {
   const fetchData = async () => {
     try {
       const response = await axios.get(
-        `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/January?key=${apiKey}`
+        `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${dashBoardSheet}?key=${apiKey}`
       );
 
       const sheetData = response.data.values;
