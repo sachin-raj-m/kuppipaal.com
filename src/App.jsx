@@ -8,8 +8,8 @@ import Navbar from "./components/navbar";
 
 const SHEETID = import.meta.env.VITE_REACT_APP_SHEET_ID;
 const APIKEY = import.meta.env.VITE_REACT_APP_GOOGLE_SHEET_API;
-const DASHBOARDSHEET = import.meta.env.VITE_REACT_APP_GOOGLE_SHEET_DASHBOARD;
-const ADMINSHEET = import.meta.env.VITE_REACT_APP_GOOGLE_SHEET_ADMIN;
+const DASHBOARDSHEET = import.meta.env.VITE_REACT_APP_DASHBOARD_SHEET_NAME;
+const ADMINSHEET = import.meta.env.VITE_REACT_APP_ADMIN_SHEET_NAME;
 
 
 const isAuthenticated = () => {
