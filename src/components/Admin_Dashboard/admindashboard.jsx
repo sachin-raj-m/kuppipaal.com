@@ -96,7 +96,7 @@ const AdminDashboard = ({ sheetId, adminSheet, apiKey, onLogout }) => {
         ); // Month and year
         ctx.fillText(
           `Date: ${currentDate.toLocaleDateString("en-GB")}`,
-          1140,
+          1200,
           50
         ); // Date
         ctx.fillText(`${rowData.Invoice}`, 1100, 458); // Invoice number
@@ -158,7 +158,7 @@ const AdminDashboard = ({ sheetId, adminSheet, apiKey, onLogout }) => {
     img.onerror = function () {
       console.error("Error loading image:", img.src);
     };
-    img.src = "src/components/Admin_Dashboard/bill_format.png"; // Replace with the path to your bill model image
+    img.src = "src/assets/bill_format.png"; // Replace with the path to your bill model image
   };
 
   const savePngInvoice = (dataUrl, consumerName) => {
