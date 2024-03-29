@@ -25,13 +25,13 @@ Kuppipaal.com is a web application built with Vite + React and JavaScriptX. It s
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-username/kuppipaal.git
+   git clone https://github.com/sachin-raj-m/kuppipaal.com.git
    ```
 
 2. Navigate to the project directory:
 
    ```bash
-   cd kuppipaal
+   cd kuppipaal.com
    ```
 
 3. Install dependencies:
