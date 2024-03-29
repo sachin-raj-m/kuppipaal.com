@@ -5,11 +5,10 @@ Kuppipaal.com is a web application built with Vite + React and JavaScriptX. It s
 ## Features
 
 - **Dashboard**: Offers an intuitive interface for users to access invoice details, milk supply data, and daily statistics.
-- **Login Page**: Provides secure authentication for accessing the platform.
+- **Login Page**: Provides secure authentication for accessing the platform for admin.
 - **Admin Dashboard**: Enables administrators to effectively manage invoices, including viewing, searching, and downloading individual invoices or all invoices as a zip file.
-- **Invoice Generation**: Simplifies the process of generating invoices for users.
-- **Search Functionality**: Allows users to search for specific invoices based on various criteria.
-- **Download Options**: Provides flexibility by allowing users to download individual invoices or all invoices packaged as a zip file.
+- **Search Functionality**: Allows users to search for their data based on various criteria.
+- **Download Options**: Provides flexibility for admin to download individual invoices or all invoices packaged as a zip file.
 
 ## Technologies Used
 
@@ -18,7 +17,6 @@ Kuppipaal.com is a web application built with Vite + React and JavaScriptX. It s
 - **JavaScriptX**: A variant of JavaScript with JSX syntax for React components.
 - **Axios**: Promise-based HTTP client for making API requests.
 - **JSZip**: Library for creating and manipulating ZIP files.
-- *(Add other relevant technologies/tools)*
 
 ## Installation
 
@@ -61,11 +59,11 @@ Kuppipaal.com is a web application built with Vite + React and JavaScriptX. It s
 
 ## Usage
 
-1. Access the login page and enter your credentials to log in and access the dashboard.
-2. Use the dashboard to view invoice details, milk supply data, and daily statistics.
-3. Administrators can access the admin dashboard to manage invoices, including searching and downloading options.
-4. Generate invoices as needed and utilize the search functionality to find specific invoices.
-5. Download individual invoices or all invoices as a zip file for convenience.
+1. Access the login page and enter your credentials to log in and access the admin dashboard.
+2. Use the DMIN dashboard to view invoice details, milk supply data, and bill generation.
+3. Generate invoices as needed and utilize the search functionality to find specific invoices.
+4. Download individual invoices or all invoices as a zip file for convenience.
+5. The Home screen does have a search bar and can search and find the details by searching with consumer name.
 
 ## Contributors
 
