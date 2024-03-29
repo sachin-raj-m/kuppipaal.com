@@ -77,4 +77,3 @@ This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-This README now includes instructions for setting up environment variables for sensitive data. Feel free to adjust the instructions or provide additional details as needed. If you have any further questions or need assistance, just let me know!
