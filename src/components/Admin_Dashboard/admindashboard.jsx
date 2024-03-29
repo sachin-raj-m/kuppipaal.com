@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import JSZip from "jszip";
 import styles from "./admindashboard.module.css";
 
 const AdminDashboard = ({ sheetId, adminSheet, apiKey, onLogout }) => {
@@ -8,11 +9,12 @@ const AdminDashboard = ({ sheetId, adminSheet, apiKey, onLogout }) => {
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [invoiceUrls, setInvoiceUrls] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
-  }, []); // Fetch data on component mount
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -34,13 +36,13 @@ const AdminDashboard = ({ sheetId, adminSheet, apiKey, onLogout }) => {
         });
 
         setData(formattedData);
-        setFilteredData(formattedData); // Set filteredData initially to full data
+        setFilteredData(formattedData);
       }
 
-      setLoading(false); // Set loading to false after data is fetched
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
-      setLoading(false); // Set loading to false on error
+      setLoading(false);
     }
   };
 
@@ -61,52 +63,55 @@ const AdminDashboard = ({ sheetId, adminSheet, apiKey, onLogout }) => {
 
   const handleReset = () => {
     setSearchTerm("");
-    setFilteredData(data); // Reset filteredData to full data
+    setFilteredData(data);
   };
 
-  const handleGenerateInvoice = (rowData) => {
-    // Get current date
+  const loadImage = (src) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = (error) => reject(error);
+      img.src = src;
+    });
+  };
+
+  const handleGenerateInvoice = async (rowData) => {
     const currentDate = new Date();
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
 
-    // Load your bill model image
-    const img = new Image();
-    img.onload = function () {
-      try {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
+    // Load bill format image
+    const billImg = await loadImage("src/assets/bill_format.png");
 
-        // Set canvas dimensions to match the image dimensions
-        canvas.width = img.width;
-        canvas.height = img.height;
+    // Set canvas dimensions to match the bill image dimensions
+    canvas.width = billImg.width;
+    canvas.height = billImg.height;
 
-        // Draw the bill model image on the canvas
-        ctx.drawImage(img, 0, 0);
+    try {
+      // Draw the bill format image on the canvas first
+      ctx.drawImage(billImg, 0, 0, canvas.width, canvas.height);
 
-        // Overlay text onto the bill model image
-        ctx.font = "25px Helvetica";
-        ctx.fillStyle = "black";
+      // Overlay text onto the bill format image
+      ctx.font = "25px Helvetica";
+      ctx.fillStyle = "black";
+      ctx.fillText(
+        `${currentDate.toLocaleString("default", {
+          month: "long",
+        })} ${currentDate.getFullYear()}`,
+        1060,
+        405
+      );
+      ctx.fillText(
+        `Date: ${currentDate.toLocaleDateString("en-GB")}`,
+        1200,
+        50
+      );
+      ctx.fillText(`${rowData.Invoice}`, 1100, 458);
 
-        // Customize positions for each entry
-        ctx.fillText(
-          `${currentDate.toLocaleString("default", {
-            month: "long",
-          })} ${currentDate.getFullYear()}`,
-          1060,
-          405
-        ); // Month and year
-        ctx.fillText(
-          `Date: ${currentDate.toLocaleDateString("en-GB")}`,
-          1200,
-          50
-        ); // Date
-        ctx.fillText(`${rowData.Invoice}`, 1100, 458); // Invoice number
-
-        // Draw other invoice details
-        // Customize positions for each entry based on column name
       Object.entries(rowData).forEach(([key, value]) => {
         switch (key) {
           case "Consumer Name":
-            ctx.font = "bold 37px Arial"
+            ctx.font = "bold 37px Arial";
             ctx.fillText(`${value}`, 125, 715);
             break;
           case "Milk Quantity (litres)":
@@ -127,7 +132,7 @@ const AdminDashboard = ({ sheetId, adminSheet, apiKey, onLogout }) => {
             break;
           case "Individual Bill -  Extra Milk":
             ctx.fillText(`${value}`, 930, 875);
-            break;  
+            break;
           case "Individual Bill - Curd":
             ctx.fillText(`${value}`, 930, 940);
             break;
@@ -144,38 +149,102 @@ const AdminDashboard = ({ sheetId, adminSheet, apiKey, onLogout }) => {
           default:
             break;
         }
-        });
+      });
 
-        // Convert canvas to PNG image data URL
-        const pngDataUrl = canvas.toDataURL("image/png");
-
-        // Save or download the PNG image
-        savePngInvoice(pngDataUrl, rowData.ConsumerName);
-      } catch (error) {
-        console.error("Error generating invoice:", error);
-      }
-    };
-    img.onerror = function () {
-      console.error("Error loading image:", img.src);
-    };
-    img.src = "src/assets/bill_format.png"; // Replace with the path to your bill model image
+      // Convert canvas to PNG image data URL
+      const pngDataUrl = canvas.toDataURL("image/png");
+      return pngDataUrl;
+    } catch (error) {
+      console.error("Error generating invoice:", error);
+      throw error;
+    }
   };
 
-  const savePngInvoice = (dataUrl, consumerName) => {
-    // Create a link element
+const handleDownloadInvoice = async (rowData) => {
+    try {
+      const url = await handleGenerateInvoice(rowData);
+      const fileName = `${rowData.Invoice}_${rowData["Consumer Name"].replace(/\s/g, "_")}.png`;
+      downloadInvoice(url, fileName);
+    } catch (error) {
+      console.error("Error downloading invoice:", error);
+    }
+};
+
+const downloadInvoice = (url, fileName) => {
+    // Create an anchor element to trigger the download
     const link = document.createElement("a");
-    link.href = dataUrl;
-    link.download = `invoice_${consumerName}.png`;
+    link.href = url;
+    link.download = fileName;
 
-    // Append the link to the body
-    document.body.appendChild(link);
-
-    // Trigger a click event on the link to initiate download
+    // Simulate click to trigger the download
     link.click();
+};
 
-    // Remove the link from the body
-    document.body.removeChild(link);
+
+  const handleDownloadAllInvoices = async () => {
+    const zip = new JSZip();
+    const errors = [];
+  
+    try {
+      await Promise.all(
+        filteredData.map(async (rowData) => {
+          try {
+            // Check if consumer name and invoice number exist
+            const consumerName = rowData["Consumer Name"];
+            const invoiceNumber = rowData["Invoice"];
+  
+            if (!consumerName || !invoiceNumber) {
+              // Skip if consumer name or invoice number is missing
+              return;
+            }
+  
+            const url = await handleGenerateInvoice(rowData);
+            const response = await fetch(url);
+            const blob = await response.blob();
+  
+            // Generate file name with invoice number and consumer name
+            const fileName =
+              `${invoiceNumber}_` +
+              consumerName.replace(/\s/g, "_") +
+              ".png";
+  
+            // Add the invoice image to the zip file
+            zip.file(fileName, blob);
+          } catch (error) {
+            console.error("Error generating invoice:", error);
+          }
+        })
+      );
+  
+      if (errors.length > 0) {
+        console.error(
+          "Errors occurred while generating invoices:",
+          errors
+        );
+        console.log(
+          "Some invoices could not be generated. Please check the console for details."
+        );
+      }
+  
+      // Generate the zip file
+      const content = await zip.generateAsync({ type: "blob" });
+  
+      // Create an anchor element to trigger the download
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(content);
+      link.download = "invoices.zip";
+  
+      // Simulate click to trigger the download
+      link.click();
+    } catch (error) {
+      console.error("Error downloading invoices:", error);
+      console.log(
+        "An error occurred while downloading invoices. Please try again later."
+      );
+    }
   };
+  
+
 
   return (
     <div className={styles.container}>
@@ -195,6 +264,9 @@ const AdminDashboard = ({ sheetId, adminSheet, apiKey, onLogout }) => {
         />
         <button onClick={handleSearch}>Search</button>
         <button onClick={handleReset}>Reset</button>
+        <button onClick={handleDownloadAllInvoices}>
+          Download All Invoices
+        </button>
       </div>
       {loading ? (
         <p>Loading...</p>
@@ -216,7 +288,7 @@ const AdminDashboard = ({ sheetId, adminSheet, apiKey, onLogout }) => {
                   <td key={index}>{value}</td>
                 ))}
                 <td>
-                  <button onClick={() => handleGenerateInvoice(row)}>
+                  <button onClick={() => handleDownloadInvoice(row)}>
                     Generate Invoice
                   </button>
                 </td>
