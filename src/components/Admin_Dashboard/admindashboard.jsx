@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import JSZip from "jszip";
 import styles from "./admindashboard.module.css";
+import billFormatImage from "./bill_format.png";
+
 
 const AdminDashboard = ({ sheetId, adminSheet, apiKey, onLogout }) => {
   const [data, setData] = useState([]);
@@ -80,8 +82,14 @@ const AdminDashboard = ({ sheetId, adminSheet, apiKey, onLogout }) => {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
 
-    // Load bill format image
-    const billImg = await loadImage("src/components/Admin_Dashboard/bill_format.png");
+    // Use the imported bill format image
+    const billImg = new Image();
+    billImg.src = billFormatImage;
+
+    // Wait for the image to load
+    await new Promise((resolve) => {
+        billImg.onload = resolve;
+    });
 
     // Set canvas dimensions to match the bill image dimensions
     canvas.width = billImg.width;
