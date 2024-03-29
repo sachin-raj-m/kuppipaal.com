@@ -81,7 +81,7 @@ const AdminDashboard = ({ sheetId, adminSheet, apiKey, onLogout }) => {
     const ctx = canvas.getContext("2d");
 
     // Load bill format image
-    const billImg = await loadImage("bill_format.png");
+    const billImg = await loadImage("src/components/Admin_Dashboard/bill_format.png");
 
     // Set canvas dimensions to match the bill image dimensions
     canvas.width = billImg.width;
