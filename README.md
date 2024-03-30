@@ -1,6 +1,6 @@
 # Kuppipaal.com
 
-Kuppipaal.com is a web application built with Vite + React and JavaScriptX. It serves as a tool for generating invoices, managing milk supply details, and presenting daily statistics. The application comprises a dashboard, a login page, and an admin dashboard with various features for efficient invoice management.
+Kuppipaal.com is a web application built with Vite + React and JavaScriptX, serving as a flexible solution for invoice creation, milk supply management, and daily statistical analysis. It features a user-friendly dashboard, a secure login page, and an admin dashboard with extensive tools for efficient invoice handling. Tailored for users with limited database expertise, the application prioritizes privacy protection and avoids hardcoding API keys or sheet IDs. Suppliers are required to update sheets daily to ensure current status information.
 
 ## Features
 
