@@ -66,6 +66,14 @@ Kuppipaal.com is a web application built with Vite + React and JavaScriptX. It s
 5. The Home screen does have a search bar and can search and find the details by searching with consumer name. By default, the home page will be empty.
 6. If you type "showall", it would trigger the system to show all the contents of the sheet including all the details.
 
+## Sheet Structure
+
+![Dashboard Sheet](https://github.com/sachin-raj-m/kuppipaal.com/assets/78268005/ae1857a8-d53e-448e-a898-7ff342163707)
+This sheet is used to show the details to the user in home screen. The data from this sheet will be taken via axios and displayed. The suplier can update it daily when the milk is supllied. The 66 and 33 here are the price of the milk. If a consuer doesn't buy on certain day, it can be changed to 0.
+
+![Admin Dashboard Sheet](https://github.com/sachin-raj-m/kuppipaal.com/assets/78268005/c8c00dee-ae8e-48be-9c28-97b9109ab846)
+This sheet is referenced using certain formulas from the first one. The Consumer Name, Quantity, Days, Individual Bill etc are referenced to make it apt for bill format.
+
 ## Contributors
 
 - **Sachin Raj M**: [GitHub Profile](https://github.com/sachin-raj-m)
