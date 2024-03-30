@@ -60,10 +60,11 @@ Kuppipaal.com is a web application built with Vite + React and JavaScriptX. It s
 ## Usage
 
 1. Access the login page and enter your credentials to log in and access the admin dashboard.
-2. Use the DMIN dashboard to view invoice details, milk supply data, and bill generation.
+2. Use the ADMIN dashboard to view invoice details, milk supply data, and bill generation.
 3. Generate invoices as needed and utilize the search functionality to find specific invoices.
 4. Download individual invoices or all invoices as a zip file for convenience.
-5. The Home screen does have a search bar and can search and find the details by searching with consumer name.
+5. The Home screen does have a search bar and can search and find the details by searching with consumer name. By default, the home page will be empty.
+6. If you type "showall", it would trigger the system to show all the contents of the sheet including all the details.
 
 ## Contributors
 
