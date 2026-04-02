@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  
+  --primary: #3b82f6;
+  --primary-focus: #2563eb;
+  
+  --secondary: #10b981;
+  --secondary-focus: #059669;
+  
+  --accent: #f59e0b;
+  --accent-focus: #d97706;
+  
+  --error: #ef4444;
+  --warning: #facc15;
+  
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-focus: var(--primary-focus);
+  --color-secondary: var(--secondary);
+  --color-secondary-focus: var(--secondary-focus);
+  --color-accent: var(--accent);
+  --color-accent-focus: var(--accent-focus);
+  --color-error: var(--error);
+  --color-warning: var(--warning);
+  --font-sans: var(--font-inter), sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter, Arial, sans-serif);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Force light text + bg on form fields — inside @layer base so Tailwind utilities override */
+@layer base {
+  input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    color: #1e293b;
+    background-color: #ffffff;
+  }
+}
+
+/* Fix browser autofill overriding text / background color */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: #1e293b;
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Glassmorphism Classes */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
