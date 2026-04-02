@@ -1,26 +1,14 @@
 import { NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@supabase/supabase-js";
 
 export async function POST(request: Request) {
-  // 1. Auth check — must be a logged-in ADMIN
-  const serverClient = await createServerClient();
-  const { data: { user } } = await serverClient.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
 
-  const { data: profile } = await serverClient
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  if (profile?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Forbidden — admin only." }, { status: 403 });
-  }
-
-  // 2. Parse and validate body
-  let fullName: string, email: string, password: string;
+  let fullName: string, email: string, password: string, role: string;
   try {
-    ({ fullName, email, password } = await request.json());
+    ({ fullName, email, password, role = "DELIVERY_PERSONNEL" } = await request.json());
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
@@ -30,6 +18,9 @@ export async function POST(request: Request) {
   }
   if (password.length < 6) {
     return NextResponse.json({ error: "Password must be at least 6 characters." }, { status: 400 });
+  }
+  if (!["ADMIN", "DELIVERY_PERSONNEL"].includes(role)) {
+    return NextResponse.json({ error: "Invalid role." }, { status: 400 });
   }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -43,7 +34,7 @@ export async function POST(request: Request) {
     );
   }
 
-  // 3. Create auth user via Supabase admin REST API
+  // Create auth user via Supabase admin REST API
   const authRes = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
     method: "POST",
     headers: {
@@ -74,24 +65,23 @@ export async function POST(request: Request) {
   const authData = await authRes.json();
   const newUserId: string = authData.id;
 
-  // 4. Ensure profile row exists with DELIVERY_PERSONNEL role
-  // (the on_auth_user_created trigger should do this, but upsert as safety net)
+  // Upsert profile with the requested role
   const adminClient = createClient(supabaseUrl, serviceRoleKey);
   const { error: profileError } = await adminClient.from("profiles").upsert({
     id: newUserId,
     full_name: fullName.trim(),
-    role: "DELIVERY_PERSONNEL",
+    role,
     is_active: true,
   });
 
   if (profileError) {
     console.error("[POST /api/personnel] Profile upsert error:", profileError.message);
-    // User was created; just warn, don't block
   }
 
   return NextResponse.json({
     id: newUserId,
     full_name: fullName.trim(),
     email: authData.email,
+    role,
   });
 }
