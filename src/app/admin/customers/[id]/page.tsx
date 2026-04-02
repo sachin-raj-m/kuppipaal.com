@@ -46,7 +46,8 @@ interface DeliveryRow {
   extra_curd_quantity: number;
   status: string;
   notes: string | null;
-  profiles: { full_name: string } | null;
+  // Supabase returns the foreign-key join as an array or object depending on the relation
+  profiles: { full_name: string } | { full_name: string }[] | null;
 }
 
 interface BillRow {
@@ -246,9 +247,9 @@ export default async function CustomerDetailPage({
         </div>
       </div>
 
-      {/* Recent deliveries table */}
+      {/* Recent deliveries */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
+        <div className="px-4 md:px-6 py-4 border-b border-slate-100 flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-slate-500" />
           <h2 className="text-base font-bold text-slate-800">Recent Deliveries</h2>
           <span className="ml-auto text-xs text-slate-400">Last 30 entries</span>
@@ -257,93 +258,88 @@ export default async function CustomerDetailPage({
         {!recentDeliveries?.length ? (
           <div className="py-12 text-center text-slate-400">
             <CalendarDays className="w-10 h-10 mx-auto mb-3 opacity-40" />
-            <p className="font-medium">No delivery records yet</p>
+            <p className="font-medium text-sm">No delivery records yet</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-100 text-left">
-                  <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                    Date
-                  </th>
-                  <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                    Milk (L)
-                  </th>
-                  <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                    Curd (L)
-                  </th>
-                  <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                    By
-                  </th>
-                  <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                    Notes
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {(recentDeliveries as DeliveryRow[]).map((d) => {
-                  const totalMilk =
-                    Number(d.milk_quantity) + Number(d.extra_milk_quantity ?? 0);
-                  const totalCurd =
-                    Number(d.curd_quantity) + Number(d.extra_curd_quantity ?? 0);
-                  const hasExtra =
-                    Number(d.extra_milk_quantity) > 0 ||
-                    Number(d.extra_curd_quantity) > 0;
+          <>
+            {/* Mobile cards */}
+            <div className="divide-y divide-slate-100 md:hidden">
+              {(recentDeliveries as DeliveryRow[]).map((d) => {
+                const totalMilk = Number(d.milk_quantity) + Number(d.extra_milk_quantity ?? 0);
+                const totalCurd = Number(d.curd_quantity) + Number(d.extra_curd_quantity ?? 0);
+                return (
+                  <div key={d.id} className="px-4 py-3 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-slate-700 text-sm">
+                        {new Date(d.delivery_date + "T00:00:00").toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })}
+                      </p>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Milk {fmt(totalMilk)} L &bull; Curd {fmt(totalCurd)} L
+                        {Number(d.extra_milk_quantity) > 0 && <span className="text-blue-600"> (+{fmt(Number(d.extra_milk_quantity))} extra milk)</span>}
+                      </p>
+                      {d.notes && <p className="text-xs text-slate-400 mt-0.5 italic truncate">{d.notes}</p>}
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <StatusBadge status={d.status} />
+                      <p className="text-[10px] text-slate-400">{(Array.isArray(d.profiles) ? d.profiles[0]?.full_name : d.profiles?.full_name) ?? ""}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
 
-                  return (
-                    <tr key={d.id} className="hover:bg-slate-50/50">
-                      <td className="px-6 py-3 font-medium text-slate-700 whitespace-nowrap">
-                        {new Date(d.delivery_date + "T00:00:00").toLocaleDateString("en-IN", {
-                          weekday: "short",
-                          day: "numeric",
-                          month: "short",
-                        })}
-                      </td>
-                      <td className="px-6 py-3 text-slate-700">
-                        <span className="font-medium">{fmt(totalMilk)}</span>
-                        {hasExtra && Number(d.extra_milk_quantity) > 0 && (
-                          <span className="ml-1.5 text-xs text-blue-600 bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded-md inline-flex items-center gap-0.5">
-                            <Plus className="w-2.5 h-2.5" />
-                            {fmt(Number(d.extra_milk_quantity))} extra
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-3 text-slate-700">
-                        <span className="font-medium">{fmt(totalCurd)}</span>
-                        {hasExtra && Number(d.extra_curd_quantity) > 0 && (
-                          <span className="ml-1.5 text-xs text-blue-600 bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded-md inline-flex items-center gap-0.5">
-                            <Plus className="w-2.5 h-2.5" />
-                            {fmt(Number(d.extra_curd_quantity))} extra
-          
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-3">
-                        <StatusBadge status={d.status} />
-                      </td>
-                      <td className="px-6 py-3 text-slate-500 text-xs">
-                        {/* profiles can be null or an object */}
-                        {(d.profiles as { full_name: string } | null)?.full_name ?? "—"}
-                      </td>
-                      <td className="px-6 py-3 text-slate-400 text-xs max-w-[180px] truncate">
-                        {d.notes || "—"}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-100 text-left">
+                    {["Date","Milk (L)","Curd (L)","Status","By","Notes"].map((h) => (
+                      <th key={h} className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {(recentDeliveries as DeliveryRow[]).map((d) => {
+                    const totalMilk = Number(d.milk_quantity) + Number(d.extra_milk_quantity ?? 0);
+                    const totalCurd = Number(d.curd_quantity) + Number(d.extra_curd_quantity ?? 0);
+                    const hasExtra = Number(d.extra_milk_quantity) > 0 || Number(d.extra_curd_quantity) > 0;
+                    return (
+                      <tr key={d.id} className="hover:bg-slate-50/50">
+                        <td className="px-6 py-3 font-medium text-slate-700 whitespace-nowrap">
+                          {new Date(d.delivery_date + "T00:00:00").toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })}
+                        </td>
+                        <td className="px-6 py-3 text-slate-700">
+                          <span className="font-medium">{fmt(totalMilk)}</span>
+                          {hasExtra && Number(d.extra_milk_quantity) > 0 && (
+                            <span className="ml-1.5 text-xs text-blue-600 bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded-md inline-flex items-center gap-0.5">
+                              <Plus className="w-2.5 h-2.5" />{fmt(Number(d.extra_milk_quantity))} extra
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-3 text-slate-700">
+                          <span className="font-medium">{fmt(totalCurd)}</span>
+                          {hasExtra && Number(d.extra_curd_quantity) > 0 && (
+                            <span className="ml-1.5 text-xs text-blue-600 bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded-md inline-flex items-center gap-0.5">
+                              <Plus className="w-2.5 h-2.5" />{fmt(Number(d.extra_curd_quantity))} extra
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-3"><StatusBadge status={d.status} /></td>
+                        <td className="px-6 py-3 text-slate-500 text-xs">{(Array.isArray(d.profiles) ? d.profiles[0]?.full_name : d.profiles?.full_name) ?? "—"}</td>
+                        <td className="px-6 py-3 text-slate-400 text-xs max-w-[180px] truncate">{d.notes || "—"}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 
       {/* Billing history */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
+        <div className="px-4 md:px-6 py-4 border-b border-slate-100 flex items-center gap-2">
           <IndianRupee className="w-5 h-5 text-slate-500" />
           <h2 className="text-base font-bold text-slate-800">Billing History</h2>
           <span className="ml-auto text-xs text-slate-400">Last 12 months</span>
@@ -352,69 +348,76 @@ export default async function CustomerDetailPage({
         {!bills?.length ? (
           <div className="py-12 text-center text-slate-400">
             <IndianRupee className="w-10 h-10 mx-auto mb-3 opacity-40" />
-            <p className="font-medium">No bills generated yet</p>
+            <p className="font-medium text-sm">No bills generated yet</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-100 text-left">
-                  <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                    Period
-                  </th>
-                  <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                    Milk (L)
-                  </th>
-                  <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                    Curd (L)
-                  </th>
-                  <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                    Amount
-                  </th>
-                  <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                    Paid On
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {(bills as BillRow[]).map((b) => (
-                  <tr key={b.id} className="hover:bg-slate-50/50">
-                    <td className="px-6 py-3 font-medium text-slate-700 whitespace-nowrap">
-                      {MONTHS[b.bill_month - 1]} {b.bill_year}
-                    </td>
-                    <td className="px-6 py-3 text-slate-600">{fmt(b.total_milk_quantity)}</td>
-                    <td className="px-6 py-3 text-slate-600">{fmt(b.total_curd_quantity)}</td>
-                    <td className="px-6 py-3 font-semibold text-slate-800">
-                      ₹{fmt(b.total_amount)}
-                    </td>
-                    <td className="px-6 py-3">
-                      {b.is_paid ? (
-                        <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 border border-green-200 text-xs px-2 py-0.5 rounded-full font-medium">
-                          <CheckCircle2 className="w-3 h-3" /> Paid
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 bg-orange-50 text-orange-700 border border-orange-200 text-xs px-2 py-0.5 rounded-full font-medium">
-                          <XCircle className="w-3 h-3" /> Unpaid
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-3 text-slate-400 text-xs">
-                      {b.paid_at
-                        ? new Date(b.paid_at).toLocaleDateString("en-IN", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })
-                        : "—"}
-                    </td>
+          <>
+            {/* Mobile cards */}
+            <div className="divide-y divide-slate-100 md:hidden">
+              {(bills as BillRow[]).map((b) => (
+                <div key={b.id} className="px-4 py-3 flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-slate-800 text-sm">{MONTHS[b.bill_month - 1]} {b.bill_year}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Milk {fmt(b.total_milk_quantity)} L &bull; Curd {fmt(b.total_curd_quantity)} L</p>
+                    {b.paid_at && (
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Paid {new Date(b.paid_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-end gap-1.5 shrink-0">
+                    <p className="font-bold text-slate-800 text-sm">₹{fmt(b.total_amount)}</p>
+                    {b.is_paid ? (
+                      <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 border border-green-200 text-[10px] px-2 py-0.5 rounded-full font-semibold">
+                        <CheckCircle2 className="w-3 h-3" /> Paid
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 bg-orange-50 text-orange-700 border border-orange-200 text-[10px] px-2 py-0.5 rounded-full font-semibold">
+                        <XCircle className="w-3 h-3" /> Unpaid
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-100 text-left">
+                    {["Period","Milk (L)","Curd (L)","Amount","Status","Paid On"].map((h) => (
+                      <th key={h} className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {(bills as BillRow[]).map((b) => (
+                    <tr key={b.id} className="hover:bg-slate-50/50">
+                      <td className="px-6 py-3 font-medium text-slate-700 whitespace-nowrap">{MONTHS[b.bill_month - 1]} {b.bill_year}</td>
+                      <td className="px-6 py-3 text-slate-600">{fmt(b.total_milk_quantity)}</td>
+                      <td className="px-6 py-3 text-slate-600">{fmt(b.total_curd_quantity)}</td>
+                      <td className="px-6 py-3 font-semibold text-slate-800">₹{fmt(b.total_amount)}</td>
+                      <td className="px-6 py-3">
+                        {b.is_paid ? (
+                          <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 border border-green-200 text-xs px-2 py-0.5 rounded-full font-medium">
+                            <CheckCircle2 className="w-3 h-3" /> Paid
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 bg-orange-50 text-orange-700 border border-orange-200 text-xs px-2 py-0.5 rounded-full font-medium">
+                            <XCircle className="w-3 h-3" /> Unpaid
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-3 text-slate-400 text-xs">
+                        {b.paid_at ? new Date(b.paid_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </div>

@@ -7,7 +7,7 @@ export default function LoginPage() {
       <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-blue-100 blur-3xl opacity-60 pointer-events-none" />
       <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[30rem] h-[30rem] rounded-full bg-green-50 blur-3xl opacity-60 pointer-events-none" />
 
-      <main className="w-full max-w-sm px-6 py-10 z-10 mx-auto bg-white/80 backdrop-blur-xl border border-white/20 shadow-xl sm:rounded-2xl">
+      <main className="w-full max-w-sm px-5 py-10 z-10 mx-auto bg-white/80 backdrop-blur-xl border border-white/20 shadow-xl sm:rounded-2xl min-h-screen sm:min-h-0 flex flex-col justify-center sm:block">
         <div className="flex flex-col items-center mb-8">
           <div className="w-14 h-14 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg transform -rotate-3 mb-4">
             <Droplet className="w-8 h-8 text-white" />
